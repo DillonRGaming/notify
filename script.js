@@ -1,4 +1,3 @@
-// --- DOM Element References ---
 const notesGrid = document.getElementById('notes-grid');
 const addNoteBtn = document.getElementById('add-note-btn');
 const searchInput = document.getElementById('search-input');
@@ -14,12 +13,10 @@ const sidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menu-toggle');
 const connectionStatus = document.getElementById('connection-status');
 
-// --- Configuration ---
-const SERVER_ADDRESS = 'localhost'; // <--- *** CHANGE THIS AS NEEDED ***
+const SERVER_ADDRESS = 'localhost';
 const WEBSOCKET_URL = `ws://${SERVER_ADDRESS}:8765`;
-const GEMINI_API_KEY = 'AIzaSyCGsEW6Hv0pSLtC3uMe_caM0A7XTlJh_I8'; // WARNING: INSECURE in frontend
+const GEMINI_API_KEY = 'AIzaSyCGsEW6Hv0pSLtCC3uMe_caM0A7XTlJh_I8';
 
-// --- WebSocket & State ---
 let ws;
 let allNotes = [];
 let currentEditingNoteId = null;
@@ -27,7 +24,6 @@ let notesUnderReview = new Set();
 let connectInterval = null;
 let connectionAttemptActive = false;
 
-// --- Note Colors ---
 const noteColorMap = {
     '#ffffff': 'var(--note-color-white)',
     '#2a2a2a': 'var(--note-color-black)',
@@ -40,9 +36,8 @@ const noteColorMap = {
 const noteColorHexes = Object.keys(noteColorMap);
 const defaultColorHex = '#2a2a2a';
 const blackColorHex = '#2a2a2a';
-const UNTITLED_PLACEHOLDER = '(Untitled Note)'; // Define placeholder
+const UNTITLED_PLACEHOLDER = '(Untitled Note)';
 
-// --- Utility Functions ---
 function debounce(func, wait) { let t; return function(...a) { const l = () => { clearTimeout(t); func.apply(this, a); }; clearTimeout(t); t = setTimeout(l, wait); }; }
 
 function getDisplayTitle(noteData) {
@@ -50,7 +45,6 @@ function getDisplayTitle(noteData) {
     return name.trim() ? name : UNTITLED_PLACEHOLDER;
 }
 
-// --- WebSocket Handling ---
 function connectWebSocket() {
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) || connectionAttemptActive) {
         console.log('WebSocket connection attempt already in progress or connected.');
@@ -159,8 +153,6 @@ function sendWebSocketMessage(data) {
         return false;
     }
 }
-
-// --- UI Rendering & Interaction ---
 
 function createColorPaletteElement(selectedColorHex, targetElement) {
     targetElement.innerHTML = '';
@@ -415,7 +407,6 @@ const handleSearch = debounce(() => {
     renderNotes(filteredNotes);
 }, 250);
 
-// --- Event Listeners Setup ---
 function setupEventListeners() {
      addNoteBtn.addEventListener('click', addNote);
      searchInput.addEventListener('input', handleSearch);
@@ -456,7 +447,6 @@ function setupEventListeners() {
      checkMobileToggle();
 }
 
-// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Setting up listeners and WebSocket.");
     renderNotes();
