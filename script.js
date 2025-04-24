@@ -15,7 +15,7 @@ const connectionStatus = document.getElementById('connection-status');
 
 const SERVER_ADDRESS = 'localhost';
 const WEBSOCKET_URL = `ws://${SERVER_ADDRESS}:8765`;
-const GEMINI_API_KEY = 'AIzaSyCGsEW6Hv0pSLtCC3uMe_caM0A7XTlJh_I8';
+const GEMINI_API_KEY = 'AIzaSyCGsEW6Hv0pSLtC3uMe_caM0A7XTlJh_I8';
 
 let ws;
 let allNotes = [];
@@ -44,31 +44,27 @@ function getDisplayTitle(noteData) {
     const name = noteData?.name || '';
     return name.trim() ? name : UNTITLED_PLACEHOLDER;
 }
-
 function connectWebSocket() {
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) || connectionAttemptActive) {
-        console.log('WebSocket connection attempt already in progress or connected.');
+
         return;
     }
     connectionAttemptActive = true;
-    console.log(`Attempting to connect WebSocket to ${WEBSOCKET_URL}...`);
+
     updateConnectionStatus('Connecting...', 'connecting');
     if (connectInterval) { clearInterval(connectInterval); connectInterval = null; }
-
     ws = new WebSocket(WEBSOCKET_URL);
-
     ws.onopen = () => {
         connectionAttemptActive = false;
-        console.log('WebSocket Connected');
+
         updateConnectionStatus('Connected', 'connected');
         ws.send(JSON.stringify({ type: 'fetch_notes' }));
         if (connectInterval) { clearInterval(connectInterval); connectInterval = null; }
     };
-
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            console.log('Message received:', data);
+
 
             if (data.type === 'notes') {
                 allNotes = data.notes || [];
@@ -99,26 +95,24 @@ function connectWebSocket() {
                  console.error("Server Error:", data.message);
                  alert(`Server error: ${data.message}`);
             } else {
-                 console.log("Received unhandled message type: ", data.type);
+
             }
         } catch (e) {
             console.error("Error processing message:", e);
         }
     };
-
     ws.onerror = (error) => {
         connectionAttemptActive = false;
         console.error('WebSocket Error:', error);
         updateConnectionStatus('Error', 'disconnected');
         if(ws) ws.close();
     };
-
     ws.onclose = (event) => {
         connectionAttemptActive = false;
-        console.log('WebSocket Disconnected:', event.code, event.reason || 'No reason given');
+
          updateConnectionStatus('Disconnected', 'disconnected');
          if (!connectInterval) {
-             console.log('Attempting to reconnect in 5 seconds...');
+
              connectInterval = setInterval(() => {
                  if (!ws || ws.readyState === WebSocket.CLOSED) {
                     connectWebSocket();
@@ -222,8 +216,8 @@ function showGridView() {
     if (currentEditingNoteId) {
          saveCurrentNoteChanges.flush();
     }
-    notesGrid.classList.remove('hidden');
-    noteEditor.classList.remove('active');
+    notesGrid.style.display = 'grid'; // Show grid using display
+    noteEditor.style.display = 'none'; // Hide editor using display
     mainHeading.style.opacity = '1';
     backButton.classList.remove('visible');
     currentEditingNoteId = null;
@@ -254,8 +248,8 @@ function showEditorView(noteData) {
     updateEditorAppearance(noteData);
     mainHeading.style.opacity = '0';
     backButton.classList.add('visible');
-    notesGrid.classList.add('hidden');
-    noteEditor.classList.add('active');
+    notesGrid.style.display = 'none'; // Hide grid using display
+    noteEditor.style.display = 'flex'; // Show editor using display (flex because it's a flex container)
     editorTitleInput.focus();
     setTimeout(() => editorTitleInput.select(), 0);
     if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
@@ -278,9 +272,8 @@ function showEditorView(noteData) {
          });
      }
  }
-
 function addNote() {
-    console.log("Add note button clicked");
+
     const newNoteData = {
         type: 'add_note',
         id: Date.now().toString(),
@@ -300,9 +293,8 @@ const saveCurrentNoteChanges = debounce(() => {
 
      const updatedTitle = editorTitleInput.value.trim();
      const updatedContent = editorContentTextarea.value;
-
      if ((currentNoteInState.name || '') !== updatedTitle || currentNoteInState.content !== updatedContent) {
-          console.log("Sending update for note:", currentEditingNoteId);
+
          sendWebSocketMessage({
              type: 'update_note',
              id: currentEditingNoteId,
@@ -319,7 +311,7 @@ saveCurrentNoteChanges.flush = () => {
       const updatedTitle = editorTitleInput.value.trim();
       const updatedContent = editorContentTextarea.value;
        if ((currentNoteInState.name || '') !== updatedTitle || currentNoteInState.content !== updatedContent) {
-           console.log("Flushing update for note:", currentEditingNoteId);
+
            sendWebSocketMessage({
                 type: 'update_note',
                 id: currentEditingNoteId,
@@ -341,7 +333,7 @@ saveCurrentNoteChanges.flush = () => {
 
      const displayTitle = getDisplayTitle(noteToRequest);
      if (confirm(`Request deletion for note "${displayTitle}"?\nThis requires confirmation in Discord.`)) {
-         console.log("Requesting deletion for note:", currentEditingNoteId);
+
          if (sendWebSocketMessage({ type: 'request_delete', id: currentEditingNoteId })) {
             notesUnderReview.add(currentEditingNoteId);
             showGridView();
@@ -357,9 +349,8 @@ async function fixNoteContent() {
          alert("Gemini API Key is not configured in script.js"); return;
      }
      editorFixBtn.disabled = true; editorFixBtn.style.opacity = '0.5'; editorFixBtn.style.cursor = 'wait';
-
      try {
-         console.log("Sending text to Gemini for correction...");
+
          const currentName = note.name || '';
          const currentContent = note.content || '';
          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -376,7 +367,8 @@ async function fixNoteContent() {
             try { const d=JSON.parse(errorText); throw new Error(`API Error: ${d?.error?.message||response.statusText}`); }
             catch(e){ throw new Error(`API Error ${response.status}: ${errorText}`); }
          }
-         const data = await response.json(); console.log("Gemini Raw:", data);
+         const data = await response.json();
+
          if (!data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error('Invalid API structure');
          const correctedText = data.candidates[0].content.parts[0].text;
          let corrected;
@@ -388,16 +380,13 @@ async function fixNoteContent() {
          }
          if (!corrected || typeof corrected.title === 'undefined' || typeof corrected.content === 'undefined') throw new Error('Parsed JSON structure incorrect.');
 
-         console.log("Correction successful:", corrected);
+
          editorTitleInput.value = corrected.title;
          editorContentTextarea.value = corrected.content;
-
          sendWebSocketMessage({ type: 'update_note', id: note.id, name: corrected.title, content: corrected.content, color: note.color });
      } catch (error) { console.error('Error fixing note:', error); alert(`Failed to fix note: ${error.message}.`);
      } finally { editorFixBtn.disabled = false; editorFixBtn.style.opacity = '1'; editorFixBtn.style.cursor = 'pointer'; }
  }
-
-
 const handleSearch = debounce(() => {
     const searchTerm = searchInput.value.toLowerCase().trim();
     const filteredNotes = !searchTerm ? allNotes : allNotes.filter(note =>
@@ -435,7 +424,7 @@ function setupEventListeners() {
      });
 
      window.addEventListener('keydown', (e) => {
-         if (e.key === 'Escape' && noteEditor.classList.contains('active')) showGridView();
+         if (e.key === 'Escape' && noteEditor.style.display === 'flex') showGridView(); // Check display style instead of class
      });
 
      const checkMobileToggle = () => {
@@ -446,9 +435,8 @@ function setupEventListeners() {
      window.addEventListener('resize', checkMobileToggle);
      checkMobileToggle();
 }
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Setting up listeners and WebSocket.");
+
     renderNotes();
     setupEventListeners();
     connectWebSocket();
