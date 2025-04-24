@@ -136,7 +136,7 @@ function updateConnectionStatus(text, statusClass) {
 function sendWebSocketMessage(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         if ('name' in data) {
-            data.name = data.name.trim();
+            data.name = (data.name || '').trim();
         }
         ws.send(JSON.stringify(data));
         return true;
@@ -378,7 +378,10 @@ async function fixNoteContent() {
              if (jsonMatch) { try { corrected = JSON.parse(jsonMatch[0]); } catch (e){throw new Error("Cannot parse API response");} }
              else { throw new Error("Cannot parse API response");}
          }
-         if (!corrected || typeof corrected.title === 'undefined' || typeof corrected.content === 'undefined') throw new Error('Parsed JSON structure incorrect.');
+         // Add check for null/undefined title/content before using them
+         if (!corrected || typeof corrected.title === 'undefined' || typeof corrected.content === 'undefined' || corrected.title === null || corrected.content === null) {
+             throw new Error('Parsed JSON structure incorrect or contains null values.');
+         }
 
 
          editorTitleInput.value = corrected.title;
