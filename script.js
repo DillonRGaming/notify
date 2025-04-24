@@ -388,12 +388,15 @@ async function fixNoteContent() {
      } finally { editorFixBtn.disabled = false; editorFixBtn.style.opacity = '1'; editorFixBtn.style.cursor = 'pointer'; }
  }
 const handleSearch = debounce(() => {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    const filteredNotes = !searchTerm ? allNotes : allNotes.filter(note =>
-        (getDisplayTitle(note) || '').toLowerCase().includes(searchTerm) ||
-        (note.content || '').toLowerCase().includes(searchTerm)
-    );
-    renderNotes(filteredNotes);
+    // Only render the grid if the editor is NOT active
+    if (noteEditor.style.display !== 'flex') {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const filteredNotes = !searchTerm ? allNotes : allNotes.filter(note =>
+            (getDisplayTitle(note) || '').toLowerCase().includes(searchTerm) ||
+            (note.content || '').toLowerCase().includes(searchTerm)
+        );
+        renderNotes(filteredNotes);
+    }
 }, 250);
 
 function setupEventListeners() {
