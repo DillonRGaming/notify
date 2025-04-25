@@ -233,6 +233,10 @@ body {
     margin-right: 2px;
 }
 
+#refresh-button {
+    margin-left: auto;
+}
+
 .view-container {
     height: auto;
     overflow-y: auto;
@@ -246,6 +250,7 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
     padding-bottom: 20px;
+    padding-top: 20px;
     width: 100%;
 }
 

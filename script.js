@@ -250,6 +250,10 @@ function showEditorView(noteData) {
     backButton.classList.add('visible');
     notesGrid.style.display = 'none'; // Hide grid using display
     noteEditor.style.display = 'flex'; // Show editor using display (flex because it's a flex container)
+    const refreshButton = document.getElementById('refresh-button');
+    if (refreshButton) {
+        refreshButton.style.display = 'none'; // Hide refresh button
+    }
     editorTitleInput.focus();
     setTimeout(() => editorTitleInput.select(), 0);
     if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
@@ -407,6 +411,16 @@ function setupEventListeners() {
      searchInput.addEventListener('input', handleSearch);
      menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
      backButton.addEventListener('click', showGridView);
+
+     const refreshButton = document.getElementById('refresh-button');
+     refreshButton.addEventListener('click', () => {
+         if (ws && ws.readyState === WebSocket.OPEN) {
+             ws.send(JSON.stringify({ type: 'fetch_notes' }));
+         } else {
+             alert("Cannot refresh: Connection is not open.");
+             connectWebSocket(); // Attempt to reconnect if not open
+         }
+     });
 
      editorTitleInput.addEventListener('input', saveCurrentNoteChanges);
      editorContentTextarea.addEventListener('input', saveCurrentNoteChanges);
