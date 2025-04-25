@@ -51,6 +51,9 @@
                         <div class="editor-actions">
                              <div class="color-palette" id="editor-color-palette">
                              </div>
+                             <button class="action-btn" id="editor-sync-button" title="Sync Changes">
+                                <i class="fa-solid fa-check"></i>
+                             </button>
                               <button class="action-btn fix-btn" id="editor-fix-btn" title="AI Suggestions">
                                   <i class="fa-solid fa-star"></i>
                               </button>
@@ -61,7 +64,7 @@
                     </div>
                     <div class="editor-content-wrapper">
                         <input type="text" class="editor-title-input" id="editor-title-input" placeholder="Title">
-                        <textarea class="editor-content-textarea" id="editor-content-textarea" placeholder="Start typing..."></textarea>
+                        <div class="editor-content-area" id="editor-content-area" contenteditable="true" data-placeholder="Start typing..."></div>
                     </div>
                 </div>
             </div>

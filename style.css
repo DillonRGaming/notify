@@ -31,21 +31,21 @@
     --status-text-color-dark: #ccc;
 
     --deletion-review-opacity: 0.6;
+
+    --typing-indicator-color: #007bff; /* Example color */
 }
 
+/* Scrollbar hiding for elements that should NOT scroll internally */
 .sidebar,
-.view-container,
-.editor-content-wrapper,
-.editor-content-textarea {
+.editor-content-wrapper {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 .sidebar::-webkit-scrollbar,
-.view-container::-webkit-scrollbar,
-.editor-content-wrapper::-webkit-scrollbar,
-.editor-content-textarea::-webkit-scrollbar {
+.editor-content-wrapper::-webkit-scrollbar {
     display: none;
 }
+
 
 .note.pending-deletion {
     opacity: var(--deletion-review-opacity);
@@ -85,13 +85,12 @@ body {
     display: flex;
     min-height: 100vh;
     line-height: 1.5;
-    overflow: hidden;
 }
 
 .app-container {
     display: flex;
     width: 100%;
-    height: 100vh;
+    height: 100vh; /* App container takes full viewport height */
 }
 
 .sidebar {
@@ -120,6 +119,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow-y: auto; /* <-- THIS IS WHERE THE MAIN SCROLLBAR GOES */
 }
 
 .logo {
@@ -238,8 +238,6 @@ body {
 }
 
 .view-container {
-    height: auto;
-    overflow-y: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -315,15 +313,17 @@ body {
     margin-top: auto;
     padding-top: 8px;
     min-height: 28px;
+     /* Use gap to space children */
+     gap: 10px;
 }
-.note-actions {
-    display: none;
-}
+/* Removed .note-actions display: none; */
+
 
 .color-palette {
     display: flex;
     gap: 5px;
     align-items: center;
+    flex-shrink: 0;
 }
 .color-option {
     width: 18px;
@@ -340,18 +340,19 @@ body {
 .color-option.selected {
     transform: scale(1.1);
     border-width: 2px;
-    border-color: var(--button-primary-bg);
 }
-.note.note-dark .color-option.selected,
-.note-editor-container.editor-dark .color-option.selected {
+.note-editor-container.editor-dark .color-option.selected,
+.note.note-dark .color-option.selected {
      border-color: var(--text-light);
 }
- .note-editor-container:not(.editor-dark) .color-option.selected {
+ .note-editor-container:not(.editor-dark) .color-option.selected,
+ .note:not(.note-dark) .color-option.selected {
      border-color: var(--button-primary-bg);
  }
 
+
 .note-editor-container {
-    display: none; /* Hide by default */
+    display: none;
     flex-direction: column;
     width: 100%;
     height: fit-content;
@@ -386,9 +387,8 @@ body {
 .editor-actions .color-palette {
     margin-right: auto;
 }
-.editor-actions .color-option {
-    width: 20px;
-    height: 20px;
+.editor-actions .action-btn {
+    flex-shrink: 0;
 }
 
 .action-btn {
@@ -404,6 +404,7 @@ body {
     width: 30px;
     height: 30px;
     transition: background-color 0.2s, color 0.2s;
+    flex-shrink: 0;
 }
 .action-btn:hover {
     background-color: rgba(0,0,0,0.05);
@@ -426,15 +427,52 @@ body {
     color: #f8d7da;
  }
 
+
 .editor-content-wrapper {
-    flex-grow: 1;
+    height: fit-content;
     padding: 20px 25px;
     display: flex;
     flex-direction: column;
-    overflow:visible;
-    height: 500px;
-    word-wrap: break-word;
 }
+
+/* *** STYLES FOR CONTENTEDITABLE DIV *** */
+.editor-content-area {
+    display: block;
+    height: auto;
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.7;
+    resize: none;
+    background: transparent;
+    color: inherit;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-height: 1em;
+
+    /* --- FLEX PROPERTIES --- */
+    flex-grow: 1;
+    flex-shrink: 0;
+    min-height: 0;
+    /* Removed overflow: hidden; - rely on main-content for scroll */
+}
+
+/* Placeholder for contenteditable div */
+.editor-content-area:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-secondary);
+    opacity: 0.6;
+    font-style: italic;
+    pointer-events: none;
+    display: block;
+}
+.note-editor-container.editor-dark .editor-content-area:empty::before {
+    color: rgba(248, 249, 250, 0.6);
+}
+
+/* Styles for the Title Input */
 .editor-title-input {
     font-size: 1.5rem;
     font-weight: 600;
@@ -447,24 +485,40 @@ body {
     color: inherit;
     flex-shrink: 0;
 }
-.editor-content-textarea {
-    display: block;
-    height: 500px;
-    width: 100%;
-    word-wrap: break-word;
-    border: none;
-    outline: none;
-    font-family: inherit;
-    font-size: 1rem;
-    line-height: 1.7;
-    resize: none;
-    background: transparent;
-    color: inherit;
-}
-.note-editor-container.editor-dark .editor-title-input::placeholder,
-.note-editor-container.editor-dark .editor-content-textarea::placeholder {
+.note-editor-container.editor-dark .editor-title-input::placeholder {
     color: rgba(248, 249, 250, 0.6);
 }
+
+/* --- TYPING INDICATOR STYLES --- */
+.note-footer .typing-indicator {
+    /* No margin-right: auto */
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--typing-indicator-color);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    flex-shrink: 0;
+}
+.note-footer .typing-indicator.visible {
+    opacity: 1;
+}
+
+.typing-indicator span {
+  animation: typing-dots 1.4s infinite ease-in-out;
+  opacity: 0;
+}
+.typing-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-dots {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+
+/* --- Responsive Adjustments --- */
 
 @media (max-width: 768px) {
     .sidebar {
@@ -520,6 +574,9 @@ body {
         font-size: 1.3rem;
         padding-bottom: 10px;
     }
+    .editor-content-area {
+        font-size: 0.95rem;
+    }
     .editor-actions {
         gap: 8px;
     }
@@ -547,10 +604,18 @@ body {
     .editor-title-input {
         font-size: 1.2rem;
     }
-    .editor-content-textarea {
-        font-size: 0.95rem;
+    .editor-content-area {
+        font-size: 0.9rem;
     }
 }
+
+/* --- Helper/Status Styles --- */
+
+ @media (min-width: 769px) {
+     .menu-toggle {
+         display: none;
+     }
+ }
 
  .connection-status {
      position: fixed;
@@ -583,10 +648,4 @@ body {
  .connection-status.hidden {
      opacity: 0;
      pointer-events: none;
- }
-
- @media (min-width: 769px) {
-     .menu-toggle {
-         display: none;
-     }
  }
